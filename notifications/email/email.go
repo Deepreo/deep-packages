@@ -50,6 +50,18 @@ type Mailler struct {
 	tlsConfig     *tls.Config
 }
 
+var defmailler *Mailler
+
+func InitGlobalMailler() func(*Mailler) {
+	return func(m *Mailler) {
+		defmailler = m
+	}
+}
+
+func GetGlobalMailler() *Mailler {
+	return defmailler
+}
+
 // SetTLSConfig sets the tls config for the mailer
 func SetTLSConfig(tlsConfig *tls.Config) func(*Mailler) {
 	return func(mailler *Mailler) {
