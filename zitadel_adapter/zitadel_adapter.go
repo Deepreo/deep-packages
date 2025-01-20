@@ -5,10 +5,12 @@ package zitadel_adapter
 
 import (
 	"context"
+	"log"
 
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 
 	"github.com/zitadel/zitadel-go/v3/pkg/client"
+	"github.com/zitadel/zitadel-go/v3/pkg/client/zitadel/management"
 	"github.com/zitadel/zitadel-go/v3/pkg/client/zitadel/user/v2"
 	"github.com/zitadel/zitadel-go/v3/pkg/zitadel"
 )
@@ -50,7 +52,11 @@ func NewZitadelAdapter(ctx context.Context, config *ZitadelConfig) error {
 			return err
 		}
 	}
-
+	resp, err := ztdlclient.ManagementService().GetMyOrg(ctx, &management.GetMyOrgRequest{})
+	if err != nil {
+		return err
+	}
+	log.Println("Organization ID: ", resp.GetOrg().GetId(), "Organization Name: ", resp.GetOrg().GetName())
 	ZitadelAdapterConnect = &ZitadelAdapter{
 		client: ztdlclient,
 		config: config,
@@ -136,4 +142,36 @@ func (z *ZitadelAdapter) UpdateEmail(ctx context.Context, userID, email, urlTemp
 		return err
 	}
 	return nil
+}
+
+func (z *ZitadelAdapter) GetUsers(ctx context.Context) ([]User, error) {
+	resp, err := z.client.UserServiceV2().ListUsers(ctx, &user.ListUsersRequest{})
+	if err != nil {
+		return nil, err
+	}
+	users := make([]User, 0)
+	for _, user := range resp.Result {
+		users = append(users, User{
+			UserID:      user.GetUserId(),
+			Username:    user.GetUsername(),
+			FirstName:   user.GetHuman().GetProfile().GetGivenName(),
+			LastName:    user.GetHuman().GetProfile().GetFamilyName(),
+			PhoneNumber: user.GetHuman().GetPhone().GetPhone(),
+		})
+	}
+	return users, nil
+}
+
+func (z *ZitadelAdapter) GetUser(ctx context.Context, userID string) (*User, error) {
+	resp, err := z.GetClient().UserServiceV2().GetUserByID(ctx, &user.GetUserByIDRequest{UserId: userID})
+	if err != nil {
+		return nil, err
+	}
+	return &User{
+		UserID:      resp.User.GetUserId(),
+		Username:    resp.User.GetUsername(),
+		FirstName:   resp.User.GetHuman().GetProfile().GetGivenName(),
+		LastName:    resp.User.GetHuman().GetProfile().GetFamilyName(),
+		PhoneNumber: resp.User.GetHuman().GetPhone().GetPhone(),
+	}, nil
 }
