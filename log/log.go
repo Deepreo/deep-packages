@@ -101,6 +101,18 @@ func anyParser(v ...any) (string, []zapcore.Field) {
 			zapFields = append(zapFields, zap.Error(val))
 		case zap.Field:
 			zapFields = append(zapFields, val)
+		case int, int8, int16, int32, int64:
+			message += fmt.Sprintf("%d ", val)
+		case uint, uint8, uint16, uint32, uint64:
+			message += fmt.Sprintf("%d ", val)
+		case float32, float64:
+			message += fmt.Sprintf("%f ", val)
+		case bool:
+			message += fmt.Sprintf("%t ", val)
+		case []byte:
+			message += fmt.Sprintf("%x ", val) 
+		default:
+			message += fmt.Sprintf("unknown(%T) ", val)
 		}
 	}
 	return message, zapFields
