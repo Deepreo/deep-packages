@@ -70,11 +70,13 @@ func (z *ZitadelAdapter) GetClient() *client.Client {
 }
 
 type User struct {
-	UserID      string `json:"user_id"`
-	Username    string `json:"username"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	PhoneNumber string `json:"phone_number"`
+	UserID            string `json:"user_id"`
+	Username          string `json:"username"`
+	FirstName         string `json:"first_name"`
+	LastName          string `json:"last_name"`
+	PhoneNumber       string `json:"phone_number"`
+	Email             string `json:"email"`
+	PreferredLanguage string `json:"preferred_language"`
 }
 
 func (z *ZitadelAdapter) UpdateUser(ctx context.Context, userCtx *User) error {
@@ -152,11 +154,13 @@ func (z *ZitadelAdapter) GetUsers(ctx context.Context) ([]User, error) {
 	users := make([]User, 0)
 	for _, user := range resp.Result {
 		users = append(users, User{
-			UserID:      user.GetUserId(),
-			Username:    user.GetUsername(),
-			FirstName:   user.GetHuman().GetProfile().GetGivenName(),
-			LastName:    user.GetHuman().GetProfile().GetFamilyName(),
-			PhoneNumber: user.GetHuman().GetPhone().GetPhone(),
+			UserID:            user.GetUserId(),
+			Username:          user.GetUsername(),
+			FirstName:         user.GetHuman().GetProfile().GetGivenName(),
+			LastName:          user.GetHuman().GetProfile().GetFamilyName(),
+			PhoneNumber:       user.GetHuman().GetPhone().GetPhone(),
+			PreferredLanguage: user.GetHuman().GetProfile().GetPreferredLanguage(),
+			Email:             user.GetHuman().GetEmail().GetEmail(),
 		})
 	}
 	return users, nil
@@ -168,10 +172,12 @@ func (z *ZitadelAdapter) GetUser(ctx context.Context, userID string) (*User, err
 		return nil, err
 	}
 	return &User{
-		UserID:      resp.User.GetUserId(),
-		Username:    resp.User.GetUsername(),
-		FirstName:   resp.User.GetHuman().GetProfile().GetGivenName(),
-		LastName:    resp.User.GetHuman().GetProfile().GetFamilyName(),
-		PhoneNumber: resp.User.GetHuman().GetPhone().GetPhone(),
+		UserID:            resp.User.GetUserId(),
+		Username:          resp.User.GetUsername(),
+		FirstName:         resp.User.GetHuman().GetProfile().GetGivenName(),
+		LastName:          resp.User.GetHuman().GetProfile().GetFamilyName(),
+		PhoneNumber:       resp.User.GetHuman().GetPhone().GetPhone(),
+		PreferredLanguage: resp.User.GetHuman().GetProfile().GetPreferredLanguage(),
+		Email:             resp.User.GetHuman().GetEmail().GetEmail(),
 	}, nil
 }
