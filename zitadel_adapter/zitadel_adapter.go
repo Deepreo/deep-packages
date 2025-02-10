@@ -5,12 +5,10 @@ package zitadel_adapter
 
 import (
 	"context"
-	"log"
 
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 
 	"github.com/zitadel/zitadel-go/v3/pkg/client"
-	"github.com/zitadel/zitadel-go/v3/pkg/client/zitadel/management"
 	"github.com/zitadel/zitadel-go/v3/pkg/client/zitadel/user/v2"
 	"github.com/zitadel/zitadel-go/v3/pkg/zitadel"
 )
@@ -52,11 +50,6 @@ func NewZitadelAdapter(ctx context.Context, config *ZitadelConfig) error {
 			return err
 		}
 	}
-	resp, err := ztdlclient.ManagementService().GetMyOrg(ctx, &management.GetMyOrgRequest{})
-	if err != nil {
-		return err
-	}
-	log.Println("Organization ID: ", resp.GetOrg().GetId(), "Organization Name: ", resp.GetOrg().GetName())
 	ZitadelAdapterConnect = &ZitadelAdapter{
 		client: ztdlclient,
 		config: config,
