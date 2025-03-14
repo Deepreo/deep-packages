@@ -78,8 +78,9 @@ func (z *ZitadelAdapter) UpdateUser(ctx context.Context, userCtx *User) error {
 			UserId:   userCtx.UserID,
 			Username: &userCtx.Username,
 			Profile: &user.SetHumanProfile{
-				GivenName:  userCtx.FirstName,
-				FamilyName: userCtx.LastName,
+				GivenName:         userCtx.FirstName,
+				FamilyName:        userCtx.LastName,
+				PreferredLanguage: &userCtx.PreferredLanguage,
 			},
 			Phone: &user.SetHumanPhone{
 				Phone: userCtx.PhoneNumber,
