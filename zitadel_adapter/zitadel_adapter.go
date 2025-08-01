@@ -5,10 +5,13 @@ package zitadel_adapter
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 
 	"github.com/zitadel/zitadel-go/v3/pkg/client"
+	"github.com/zitadel/zitadel-go/v3/pkg/client/zitadel/object/v2"
+	"github.com/zitadel/zitadel-go/v3/pkg/client/zitadel/session/v2"
 	"github.com/zitadel/zitadel-go/v3/pkg/client/zitadel/user/v2"
 	"github.com/zitadel/zitadel-go/v3/pkg/zitadel"
 )
@@ -93,6 +96,39 @@ func (z *ZitadelAdapter) UpdateUser(ctx context.Context, userCtx *User) error {
 		return err
 	}
 	return nil
+}
+func (z *ZitadelAdapter) LogoutUser(ctx context.Context, userId string) error {
+	resp, err := z.GetClient().SessionServiceV2().ListSessions(ctx, &session.ListSessionsRequest{
+		Queries: []*session.SearchQuery{
+			{
+				Query: &session.SearchQuery_UserIdQuery{
+					UserIdQuery: &session.UserIDQuery{
+						Id: userId,
+					},
+				},
+			},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	for _, sess := range resp.Sessions {
+		z.GetClient().SessionServiceV2().DeleteSession(ctx, &session.DeleteSessionRequest{
+			SessionId: sess.GetId(),
+		})
+	}
+	return nil
+}
+
+func (z *ZitadelAdapter) ListSessions(ctx context.Context) ([]*session.Session, error) { // Buraya sonradan info felan eklenebilir.
+	resp, err := z.GetClient().SessionServiceV2().ListSessions(ctx, &session.ListSessionsRequest{
+		Query: &object.ListQuery{},
+	})
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(resp.String())
+	return resp.GetSessions(), nil
 }
 
 func (z *ZitadelAdapter) UpdatePassword(ctx context.Context, userID, oldPass, newPassword string) error {
